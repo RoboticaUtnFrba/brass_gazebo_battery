@@ -62,13 +62,15 @@ void BatteryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   gzdbg << "Loading the BatteryPlugin \n";
 #endif
 
+  const std::string node_name = _sdf->Get<std::string>("ros_node");
+
   // check if the ros is up!
   if (!ros::isInitialized())
   {
     ROS_INFO_STREAM("Initializing ROS...");
     int argc = 0;
     char** argv = NULL;
-    ros::init(argc, argv, _sdf->Get<std::string>("ros_node"), ros::init_options::NoSigintHandler);
+    ros::init(argc, argv, node_name, ros::init_options::NoSigintHandler);
   }
 
   this->model = _model;
@@ -81,10 +83,10 @@ void BatteryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 #endif
 
   // Create ros node and publish stuff there!
-  this->rosNode.reset(new ros::NodeHandle(_sdf->Get<std::string>("ros_node")));
+  this->rosNode.reset(new ros::NodeHandle(node_name));
   if (this->rosNode->ok())
   {
-    ROS_GREEN_STREAM("ROS node is up");
+    ROS_GREEN_STREAM("ROS node is up: " << node_name);
   }
 
   // Publish a topic for charge level
@@ -94,17 +96,18 @@ void BatteryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->battery_voltage_pub = this->rosNode->advertise<std_msgs::Float64>("battery_voltage", 1);
   this->battery_remaining_pub = this->rosNode->advertise<std_msgs::Float64>("battery_remaining", 1);
 
-  this->set_charging_srv =
-      this->rosNode->advertiseService(this->model->GetName() + "/set_charging", &BatteryPlugin::SetCharging, this);
-  this->set_charging_rate_srv = this->rosNode->advertiseService(this->model->GetName() + "/set_charge_rate",
-                                                                &BatteryPlugin::SetChargingRate, this);
-  this->set_charge_srv =
-      this->rosNode->advertiseService(this->model->GetName() + "/set_charge", &BatteryPlugin::SetCharge, this);
-  this->set_coefficients_srv = this->rosNode->advertiseService(this->model->GetName() + "/set_model_coefficients",
-                                                               &BatteryPlugin::SetModelCoefficients, this);
-
   std::string linkName = _sdf->Get<std::string>("link_name");
   this->link = this->model->GetLink(linkName);
+  std::string batteryName = _sdf->Get<std::string>("battery_name");
+
+  this->set_charging_srv =
+      this->rosNode->advertiseService(batteryName + "/set_charging", &BatteryPlugin::SetCharging, this);
+  this->set_charging_rate_srv = this->rosNode->advertiseService(batteryName + "/set_charge_rate",
+                                                                &BatteryPlugin::SetChargingRate, this);
+  this->set_charge_srv =
+      this->rosNode->advertiseService(batteryName + "/set_charge", &BatteryPlugin::SetCharge, this);
+  this->set_coefficients_srv = this->rosNode->advertiseService(batteryName + "/set_model_coefficients",
+                                                               &BatteryPlugin::SetModelCoefficients, this);
 
   this->e0 = _sdf->Get<double>("constant_coef");
   this->e1 = _sdf->Get<double>("linear_coef");
@@ -113,8 +116,6 @@ void BatteryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->c = _sdf->Get<double>("capacity");
   this->r = _sdf->Get<double>("resistance");
   this->tau = _sdf->Get<double>("smooth_current_tau");
-
-  std::string batteryName = _sdf->Get<std::string>("battery_name");
 
   if (this->link->BatteryCount() > 0)
   {

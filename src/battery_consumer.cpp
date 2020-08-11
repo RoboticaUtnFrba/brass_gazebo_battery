@@ -21,18 +21,21 @@ BatteryConsumerPlugin::~BatteryConsumerPlugin()
 
 void BatteryConsumerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
-  // TODO: checking whether these elements exists
+  GZ_ASSERT(_model != nullptr, "Model pointer is NULL");
+  GZ_ASSERT(_sdf != nullptr, "SDF Element pointer is NULL");
 
 #ifdef CONSUMER_DEBUG
   gzdbg << "started loading consumer \n";
 #endif
+
+  const std::string node_name = _sdf->Get<std::string>("ros_node");
 
   // check if the ros is up!
   if (!ros::isInitialized())
   {
     int argc = 0;
     char** argv = NULL;
-    ros::init(argc, argv, _sdf->Get<std::string>("ros_node"), ros::init_options::NoSigintHandler);
+    ros::init(argc, argv, node_name, ros::init_options::NoSigintHandler);
   }
 
   this->model = _model;
@@ -51,9 +54,9 @@ void BatteryConsumerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->battery->SetPowerLoad(this->consumerId, powerLoad);
 
   // Create ros node and publish stuff there!
-  this->rosNode.reset(new ros::NodeHandle(_sdf->Get<std::string>("ros_node")));
+  this->rosNode.reset(new ros::NodeHandle(node_name));
 
-  this->set_power_load = this->rosNode->advertiseService(this->model->GetName() + "/set_power_load",
+  this->set_power_load = this->rosNode->advertiseService(batteryName + "/set_power_load",
                                                          &BatteryConsumerPlugin::SetConsumerPowerLoad, this);
 
 #ifdef CONSUMER_DEBUG
