@@ -89,16 +89,16 @@ void BatteryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     ROS_GREEN_STREAM("ROS node is up: " << node_name);
   }
 
-  // Publish a topic for charge level
-  this->charge_state_pub = this->rosNode->advertise<std_msgs::Float64>("charge_level", 1);
-  this->charge_state_mwh_pub = this->rosNode->advertise<std_msgs::Float64>("charge_level_mwh", 1);
-  this->charge_current_pub = this->rosNode->advertise<std_msgs::Float64>("charge_current", 1);
-  this->battery_voltage_pub = this->rosNode->advertise<std_msgs::Float64>("battery_voltage", 1);
-  this->battery_remaining_pub = this->rosNode->advertise<std_msgs::Float64>("battery_remaining", 1);
-
   std::string linkName = _sdf->Get<std::string>("link_name");
   this->link = this->model->GetLink(linkName);
   std::string batteryName = _sdf->Get<std::string>("battery_name");
+
+  // Publish a topic for charge level
+  this->charge_state_pub = this->rosNode->advertise<std_msgs::Float64>(batteryName + "/charge_level", 1);
+  this->charge_state_mwh_pub = this->rosNode->advertise<std_msgs::Float64>(batteryName + "/charge_level_mwh", 1);
+  this->charge_current_pub = this->rosNode->advertise<std_msgs::Float64>(batteryName + "/charge_current", 1);
+  this->battery_voltage_pub = this->rosNode->advertise<std_msgs::Float64>(batteryName + "/battery_voltage", 1);
+  this->battery_remaining_pub = this->rosNode->advertise<std_msgs::Float64>(batteryName + "/battery_remaining", 1);
 
   this->set_charging_srv =
       this->rosNode->advertiseService(batteryName + "/set_charging", &BatteryPlugin::SetCharging, this);
