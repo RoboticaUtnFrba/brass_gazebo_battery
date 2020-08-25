@@ -173,7 +173,7 @@ double BatteryPlugin::OnUpdateVoltage(const common::BatteryPtr& _battery)
 
   if (fabs(_battery->Voltage()) < 1e-3)
   {
-    ROS_GREEN_STREAM("BatteryPlugin::OnUpdateVoltage -> Battery Voltage is too low: " << _battery->Voltage());
+    ROS_GREEN_STREAM_THROTTLE("BatteryPlugin::OnUpdateVoltage -> Battery Voltage is too low: " << _battery->Voltage());
     return 0.0;
   }
   for (auto powerLoad : _battery->PowerLoads())

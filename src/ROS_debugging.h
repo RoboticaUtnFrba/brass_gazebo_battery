@@ -68,6 +68,8 @@ std::ostream& operator<<(std::ostream& os, PRINT_COLOR c)
 #define ROS_MAGENTA_STREAM(x) ROS_INFO_STREAM(pc::MAGENTA << x << pc::ENDCOLOR)
 #define ROS_CYAN_STREAM(x) ROS_INFO_STREAM(pc::CYAN << x << pc::ENDCOLOR)
 
+#define ROS_GREEN_STREAM_THROTTLE(x) ROS_INFO_STREAM_THROTTLE(1, pc::GREEN << x << pc::ENDCOLOR)
+
 #define ROS_BLACK_STREAM_COND(c, x) ROS_INFO_STREAM_COND(c, pc::BLACK << x << pc::ENDCOLOR)
 #define ROS_RED_STREAM_COND(c, x) ROS_INFO_STREAM_COND(c, pc::RED << x << pc::ENDCOLOR)
 #define ROS_GREEN_STREAM_COND(c, x) ROS_INFO_STREAM_COND(c, pc::GREEN << x << pc::ENDCOLOR)
